@@ -28,11 +28,11 @@ def generate_and_print_uuid():
 def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_id):
     url = 'https://www.coinpayments.net/api.php'
     merchant_id = 'c80ec2928c4b6836e6ada19db1c229ec'
-    ipn_secret = '1122334455667788aA@'
+    private_key = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb8A8C4302867b'
 
     payload = {
         'version': 1,
-        'key': COINPAYMENTS_PUBLIC_KEY,
+        'key': 'YOUR_PUBLIC_KEY',  # کلید عمومی شما
         'cmd': 'create_transaction',
         'amount': amount,
         'currency1': currency1,
@@ -41,16 +41,22 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_
         'success_url': APP_URL,
     }
 
+    # ساخت پیغام مرتب شده
     sorted_msg = '&'.join([f"{k}={v}" for k, v in payload.items()])
+
+    # ساخت امضا
     digest = hmac.new(
-        str(COINPAYMENTS_PRIVATE_KEY).encode(),
+        str(private_key).encode(),
         f'{sorted_msg}'.encode(),
         hashlib.sha512
     )
     signature = digest.hexdigest()
     payload['hmac'] = signature
+
+    # اضافه کردن Merchant ID به payload
     payload['merchant'] = merchant_id
 
+    # ارسال درخواست POST
     response = requests.post(url, data=payload)
 
     if response.status_code == 200:
@@ -58,31 +64,14 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_
         checkout_url = payment_data.get('result', {}).get('checkout_url')
 
         if checkout_url:
-            return checkout_url
-        else:
-            return None
-    else:
-        print(f"Error creating payment link: {response.status_code}, {response.text}")
-        return None
-
-@bot.message_handler(commands=['start'])
-def start(message):
-    user_id = message.from_user.id
-
-    # Check if the user has already initiated the payment
-    if user_states.get(user_id) == 'initiated':
-        bot.send_message(user_id, 'You have already initiated the payment. Please proceed with the payment.')
-    else:
-        # Set user state to 'initiated'
-        user_states[user_id] = 'initiated'
-
-        # Create and send the payment link
-        payment_link = create_coinpayments_payment(amount=25, currency1='usd', currency2='btc', buyer_email='buyer@example.com', user_id=user_id)
-        
-        if payment_link:
-            bot.send_message(user_id, f'Hello! Click the link below to initiate the payment:\n{payment_link}')
+            bot.send_message(user_id, f'Click the link below to make a payment:\n{checkout_url}')
         else:
             bot.send_message(user_id, 'Error creating payment link. Please try again later.')
+    else:
+        print(f"Error creating payment link: {response.status_code}, {response.text}")
+        bot.send_message(user_id, 'Error creating payment link. Please try again later.')
+
+# تابع create_coinpayments_payment را با اطلاعات دقیق خود تنظیم کنید
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def echo(message):
