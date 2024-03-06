@@ -7,10 +7,10 @@ import json
 import hmac
 import hashlib
 
-TOKEN = '7137673728:AAE85wL1RBYskkrlCZaIzhEbgKmiEBiefDI'
+TOKEN = 'YOUR_BOT_TOKEN'
 APP_URL = f'https://youtubenew-c7c31f2cda46.herokuapp.com/{TOKEN}'
-COINPAYMENTS_PUBLIC_KEY = '616e319dad674f8906f129a735d299d6665388a0fe3f4e075ffc3e2b9c3ce8f3'
-COINPAYMENTS_PRIVATE_KEY = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb8A8C4302867b'
+COINPAYMENTS_PUBLIC_KEY = 'YOUR_COINPAYMENTS_PUBLIC_KEY'
+COINPAYMENTS_PRIVATE_KEY = 'YOUR_COINPAYMENTS_PRIVATE_KEY'
 
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
@@ -32,7 +32,7 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_
 
     payload = {
         'version': 1,
-        'key': 'YOUR_PUBLIC_KEY',  # کلید عمومی شما
+        'key': COINPAYMENTS_PUBLIC_KEY,
         'cmd': 'create_transaction',
         'amount': amount,
         'currency1': currency1,
@@ -41,10 +41,7 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_
         'success_url': APP_URL,
     }
 
-    # ساخت پیغام مرتب شده
     sorted_msg = '&'.join([f"{k}={v}" for k, v in payload.items()])
-
-    # ساخت امضا
     digest = hmac.new(
         str(private_key).encode(),
         f'{sorted_msg}'.encode(),
@@ -52,11 +49,8 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_
     )
     signature = digest.hexdigest()
     payload['hmac'] = signature
-
-    # اضافه کردن Merchant ID به payload
     payload['merchant'] = merchant_id
 
-    # ارسال درخواست POST
     response = requests.post(url, data=payload)
 
     if response.status_code == 200:
@@ -64,18 +58,27 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_
         checkout_url = payment_data.get('result', {}).get('checkout_url')
 
         if checkout_url:
-            bot.send_message(user_id, f'Click the link below to make a payment:\n{checkout_url}')
+            return checkout_url
         else:
-            bot.send_message(user_id, 'Error creating payment link. Please try again later.')
+            print(f"Error creating payment link: {response.status_code}, {response.text}")
+            return None
     else:
         print(f"Error creating payment link: {response.status_code}, {response.text}")
-        bot.send_message(user_id, 'Error creating payment link. Please try again later.')
+        return None
 
-# تابع create_coinpayments_payment را با اطلاعات دقیق خود تنظیم کنید
+@bot.message_handler(commands=['start'])
+def start(message):
+    user_id = message.from_user.id
+    user_states[user_id] = 'initiated'
+    payment_link = create_coinpayments_payment(amount=25, currency1='usd', currency2='btc', buyer_email='buyer@example.com', user_id=user_id)
+
+    if payment_link:
+        bot.send_message(user_id, f'Click the link below to make a payment:\n{payment_link}')
+    else:
+        bot.send_message(user_id, 'Error creating payment link. Please try again later.')
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def echo(message):
-    # Check if the user has initiated the payment
     user_id = message.from_user.id
     if user_states.get(user_id) == 'initiated':
         bot.send_message(user_id, 'You have initiated the payment. Please proceed with the payment.')
