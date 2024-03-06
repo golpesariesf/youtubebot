@@ -8,4 +8,3 @@ uuid==1.30
 pyTelegramBotAPI==3.8.1
 Flask
 Werkzeug
-logging
