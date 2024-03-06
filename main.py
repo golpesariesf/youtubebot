@@ -7,6 +7,9 @@ import json
 import hmac
 import hashlib
 
+# Setup logging
+logging.basicConfig(filename='bot_log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 TOKEN = '7137673728:AAE85wL1RBYskkrlCZaIzhEbgKmiEBiefDI'
 APP_URL = f'https://youtubenew-c7c31f2cda46.herokuapp.com/{TOKEN}'
 COINPAYMENTS_PUBLIC_KEY = '616e319dad674f8906f129a735d299d6665388a0fe3f4e075ffc3e2b9c3ce8f3'
@@ -65,7 +68,11 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_
     else:
         print(f"Error creating payment link: {response.status_code}, {response.text}")
         return None
-
+        
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+        return None
+        
 @bot.message_handler(commands=['start'])
 def start(message):
     user_id = message.from_user.id
