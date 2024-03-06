@@ -1,4 +1,4 @@
-﻿import logging
+﻿
 import uuid
 import telebot
 from flask import Flask, request
@@ -13,18 +13,15 @@ APP_URL = f'https://youtubenew-c7c31f2cda46.herokuapp.com/{TOKEN}'
 COINPAYMENTS_PUBLIC_KEY = '616e319dad674f8906f129a735d299d6665388a0fe3f4e075ffc3e2b9c3ce8f3'
 COINPAYMENTS_PRIVATE_KEY = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb8A8C4302867b'
 
-# تنظیمات logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
 
 def generate_and_print_uuid():
     unique_id = uuid.uuid4()
-    logging.debug("Generated UUID: %s", unique_id)
+    print(unique_id)
 
     unique_id_str = unique_id.hex
-    logging.debug("UUID HEX: %s", unique_id_str)
+    print("UUID HEX:", unique_id_str)
 
 def create_coinpayments_payment(amount, currency1, currency2, buyer_email):
     url = 'https://www.coinpayments.net/api.php'
@@ -60,11 +57,11 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email):
     if response.status_code == 200:
         payment_data = response.json()
         checkout_url = payment_data.get('result', {}).get('checkout_url')
-        logging.debug("Payment link created successfully: %s", checkout_url)
         return checkout_url
     else:
-        logging.error("Error creating payment link: %s, %s", response.status_code, response.text)
+        print(f"Error creating payment link: {response.status_code}, {response.text}")
         return None
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
