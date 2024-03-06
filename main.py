@@ -10,7 +10,7 @@ import hashlib
 TOKEN = '7137673728:AAE85wL1RBYskkrlCZaIzhEbgKmiEBiefDI'
 APP_URL = f'https://youtubenew-c7c31f2cda46.herokuapp.com/{TOKEN}'
 NOWPAYMENTS_API_KEY = '4H1ZFMD-459MGM6-HFX476C-VHB4A66'
-NOWPAYMENTS_SECRET_KEY = '2b34f880-6265-477d-8508-4b2b159346bb'
+NOWPAYMENTS_SECRET_KEY = 'gcCRjKMtHxG3VHNAGbF65q8MmFfJ1U+1'
 
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
