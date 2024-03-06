@@ -54,24 +54,25 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_
     payload['hmac'] = signature
     payload['merchant'] = merchant_id
 
-    response = requests.post(url, data=payload)
+    try:
+        response = requests.post(url, data=payload)
 
-    if response.status_code == 200:
-        payment_data = response.json()
-        checkout_url = payment_data.get('result', {}).get('checkout_url')
+        if response.status_code == 200:
+            payment_data = response.json()
+            checkout_url = payment_data.get('result', {}).get('checkout_url')
 
-        if checkout_url:
-            return checkout_url
+            if checkout_url:
+                return checkout_url
+            else:
+                print(f"Error creating payment link: {response.status_code}, {response.text}")
+                return None
         else:
             print(f"Error creating payment link: {response.status_code}, {response.text}")
             return None
-    else:
-        print(f"Error creating payment link: {response.status_code}, {response.text}")
-        return None
-        
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
         return None
+
         
 @bot.message_handler(commands=['start'])
 def start(message):
