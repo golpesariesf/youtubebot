@@ -1,5 +1,4 @@
-﻿
-import uuid
+﻿import uuid
 import telebot
 from flask import Flask, request
 import os
@@ -15,6 +14,9 @@ COINPAYMENTS_PRIVATE_KEY = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb
 
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
+
+# Dictionary to store user state (whether they have initiated the payment or not)
+user_states = {}
 
 def generate_and_print_uuid():
     unique_id = uuid.uuid4()
@@ -56,29 +58,40 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_
         checkout_url = payment_data.get('result', {}).get('checkout_url')
 
         if checkout_url:
-            bot.send_message(user_id, f'Click the link below to make a payment:\n{checkout_url}')
+            return checkout_url
         else:
-            bot.send_message(user_id, 'Error creating payment link. Please try again later.')
+            return None
     else:
         print(f"Error creating payment link: {response.status_code}, {response.text}")
-        bot.send_message(user_id, 'Error creating payment link. Please try again later.')
         return None
-
 
 @bot.message_handler(commands=['start'])
 def start(message):
     user_id = message.from_user.id
-    payment_link = create_coinpayments_payment(amount=25, currency1='usd', currency2='btc', buyer_email='buyer@example.com', user_id=user_id)
 
-
-    if payment_link:
-        bot.send_message(user_id, f'Click the link below to make a payment:\n{payment_link}')
+    # Check if the user has already initiated the payment
+    if user_states.get(user_id) == 'initiated':
+        bot.send_message(user_id, 'You have already initiated the payment. Please proceed with the payment.')
     else:
-        bot.send_message(user_id, 'Error creating payment link. Please try again later.')
+        # Set user state to 'initiated'
+        user_states[user_id] = 'initiated'
+
+        # Create and send the payment link
+        payment_link = create_coinpayments_payment(amount=25, currency1='usd', currency2='btc', buyer_email='buyer@example.com', user_id=user_id)
+        
+        if payment_link:
+            bot.send_message(user_id, f'Hello! Click the link below to initiate the payment:\n{payment_link}')
+        else:
+            bot.send_message(user_id, 'Error creating payment link. Please try again later.')
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def echo(message):
-    bot.reply_to(message, message.text)
+    # Check if the user has initiated the payment
+    user_id = message.from_user.id
+    if user_states.get(user_id) == 'initiated':
+        bot.send_message(user_id, 'You have initiated the payment. Please proceed with the payment.')
+    else:
+        bot.reply_to(message, message.text)
 
 @server.route('/' + TOKEN, methods=['POST'])
 def get_message():
