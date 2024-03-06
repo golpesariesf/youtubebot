@@ -32,8 +32,9 @@ def create_nowpayments_payment_link(amount, currency):
     payload = {
         'price_amount': amount,
         'price_currency': currency,
-        'pay_currency': currency,  # You can change this to the desired payment currency
-        'order_id': str(uuid.uuid4()),  # Generate a unique order ID
+        'pay_currency': currency,
+        'order_id': str(uuid.uuid4()),
+        'success_url': APP_URL,  # Add this line to redirect the user to your app after successful payment
     }
 
     sorted_msg = json.dumps(payload, separators=(',', ':'), sort_keys=True)
