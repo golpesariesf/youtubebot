@@ -6,6 +6,7 @@ import requests
 import json
 import hmac
 import hashlib
+import logging
 
 # Setup logging
 logging.basicConfig(filename='bot_log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -69,6 +70,13 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_
         else:
             print(f"Error creating payment link: {response.status_code}, {response.text}")
             return None
+<<<<<<< HEAD
+=======
+    else:
+        print(f"Error creating payment link: {response.status_code}, {response.text}")
+        return None
+  try:      
+>>>>>>> 8b29bf5bc622be771d3149f4645b10d03b82a069
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
         return None
