@@ -23,11 +23,10 @@ def generate_and_print_uuid():
     unique_id_str = unique_id.hex
     print("UUID HEX:", unique_id_str)
 
-def create_coinpayments_payment(amount, currency1, currency2, buyer_email):
+def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_id):
     url = 'https://www.coinpayments.net/api.php'
-
-    merchant_id = 'c80ec2928c4b6836e6ada19db1c229ec'  
-    ipn_secret = '1122334455667788aA@'    
+    merchant_id = 'c80ec2928c4b6836e6ada19db1c229ec'
+    ipn_secret = '1122334455667788aA@'
 
     payload = {
         'version': 1,
@@ -48,8 +47,6 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email):
     )
     signature = digest.hexdigest()
     payload['hmac'] = signature
-
-    # اضافه کردن Merchant ID به payload
     payload['merchant'] = merchant_id
 
     response = requests.post(url, data=payload)
@@ -57,16 +54,22 @@ def create_coinpayments_payment(amount, currency1, currency2, buyer_email):
     if response.status_code == 200:
         payment_data = response.json()
         checkout_url = payment_data.get('result', {}).get('checkout_url')
-        return checkout_url
+
+        if checkout_url:
+            bot.send_message(user_id, f'Click the link below to make a payment:\n{checkout_url}')
+        else:
+            bot.send_message(user_id, 'Error creating payment link. Please try again later.')
     else:
         print(f"Error creating payment link: {response.status_code}, {response.text}")
+        bot.send_message(user_id, 'Error creating payment link. Please try again later.')
         return None
 
 
 @bot.message_handler(commands=['start'])
 def start(message):
     user_id = message.from_user.id
-    payment_link = create_coinpayments_payment(amount=25, currency1='usd', currency2='btc', buyer_email='buyer@example.com')
+    payment_link = create_coinpayments_payment(amount=25, currency1='usd', currency2='btc', buyer_email='buyer@example.com', user_id=user_id)
+
 
     if payment_link:
         bot.send_message(user_id, f'Click the link below to make a payment:\n{payment_link}')
