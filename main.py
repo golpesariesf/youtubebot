@@ -15,10 +15,17 @@ COINPAYMENTS_PRIVATE_KEY = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
 
+def generate_and_print_uuid():
+    unique_id = uuid.uuid4()
+    print(unique_id)
+
+    unique_id_str = unique_id.hex
+    print("UUID HEX:", unique_id_str)
+
 def create_coinpayments_payment(amount, currency1, currency2, buyer_email):
     url = 'https://www.coinpayments.net/api.php'
 
-    merchant_id = 'c80ec2928c4b6836e6ada19db1c229ec' 
+    merchant_id = 'c80ec2928c4b6836e6ada19db1c229ec'  
     ipn_secret = '1122334455667788aA@'    
 
     payload = {
@@ -82,5 +89,5 @@ def webhook():
     bot.set_webhook(url=APP_URL)
     return '!', 200
 
-if __name__ == '__main__':
-    server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8000)))
+if __name__ == '__main__' or __name__ == 'telegram_bot':
+    generate_and_print_uuid()
