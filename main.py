@@ -34,21 +34,23 @@ def generate_and_print_uuid():
 
 def create_coinpayments_payment(amount, currency1, currency2, buyer_email, user_id):
     url = 'https://www.coinpayments.net/api.php'
-    merchant_id = 'c80ec2928c4b6836e6ada19db1c229ec'
 
-    # Set fixed amount of 25 USD
-    amount = 25
+    # Set fixed amount of 25 USD (optional, modify if needed)
+    amount = 25  
 
     payload = {
         'version': 1,
         'key': COINPAYMENTS_PUBLIC_KEY,
-        'cmd': 'create_payment_button',  # Use create_payment_button for a custom button
+        'cmd': 'create_transaction',  # Use cmd=create_transaction for a direct transaction
         'amount': amount,
         'currency1': currency1,
         'currency2': currency2,
         'buyer_email': buyer_email,
         'success_url': APP_URL,
     }
+
+    # ... rest of the code for sorting message, generating signature, etc. remains the same
+
 
     sorted_msg = '&'.join([f"{k}={v}" for k, v in payload.items()])
     digest = hmac.new(
