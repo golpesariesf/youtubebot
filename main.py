@@ -138,9 +138,12 @@ def start(message):
     user_states[user_id] = None
 
     bot.send_message(user_id, 'به ربات پرداخت خوش آمدید!')
-    bot.send_message(user_id, 'برای پرداخت 25 دلار، روی دکمه زیر کلیک کنید:')
-    bot.send_message(user_id,
-                     'https://www.coinpayments.net/index.php?cmd=create_payment_button&amount=25&currency1=USD&currency2=BTC&buyer_email=buyer@example.com&success_url=https://youtubenew-c7c31f2cda46.herokuapp.com/7137673728:AAE85wL1RBYskkrlCZaIzhEbgKmiEBiefDI')
+    payment_link = create_coinpayments_payment(25, 'USD', 'BTC', 'buyer@example.com', user_id)
+    
+    if payment_link:
+        bot.send_message(user_id, f'برای پرداخت 25 دلار، [اینجا کلیک کنید]({payment_link})', parse_mode='Markdown')
+    else:
+        bot.send_message(user_id, 'متاسفانه مشکلی در ایجاد لینک پرداخت به وجود آمد. لطفاً دوباره تلاش کنید.')
 
 
 @bot.message_handler(func=lambda message: True)
@@ -152,6 +155,13 @@ def echo(message):
         bot.send_message(user_id, 'برای پرداخت 25 دلار، روی دکمه زیر کلیک کنید:')
         bot.send_message(user_id,
                          'https://www.coinpayments.net/index.php?cmd=create_payment_button&amount=25&currency1=USD&currency2=BTC&buyer_email=buyer@example.com&success_url=https://youtubenew-c7c31f2cda46.herokuapp.com/7137673728:AAE85wL1RBYskkrlCZaIzhEbgKmiEBiefDI')
+    elif message.text == '/link':
+        bot.send_message(user_id, 'لینک پرداخت:')
+        payment_link = create_coinpayments_payment(25, 'USD', 'BTC', 'buyer@example.com', user_id)
+        if payment_link:
+            bot.send_message(user_id, payment_link)
+        else:
+            bot.send_message(user_id, 'خطا در ایجاد لینک پرداخت. لطفاً دوباره امتحان کنید.')
 
 
 if __name__ == '__main__':
