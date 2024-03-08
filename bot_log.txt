@@ -1,0 +1,142 @@
+import telebot
+from flask import Flask, request
+import json
+import hmac
+import hashlib
+import logging
+import requests
+
+# Setup logging
+logging.basicConfig(filename='bot_log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+TOKEN = '7137673728:AAE85wL1RBYskkrlCZaIzhEbgKmiEBiefDI'
+APP_URL = f'https://biamoozim.pythonanywhere.com/{TOKEN}'
+COINPAYMENTS_PUBLIC_KEY = '616e319dad674f8906f129a735d299d6665388a0fe3f4e075ffc3e2b9c3ce8f3'
+COINPAYMENTS_PRIVATE_KEY = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb8A8C4302867b'
+IPN_SECRET = '1122334455667788aA@' # Replace with your CoinPayments IPN Secret
+MERCHANT_ID = "c80ec2928c4b6836e6ada19db1c229ec" # اضافه کنید
+
+
+bot = telebot.TeleBot(TOKEN)
+server = Flask(__name__)
+bot.remove_webhook()
+# Dictionary to store user states
+user_states = {}
+
+
+def generate_and_print_uuid():
+ unique_id = uuid.uuid4()
+ return unique_id.hex
+
+
+def check_payment_status(txn_id):
+ # درخواست اطلاعات تراکنش از CoinPayments
+ response = requests.get(
+  "https://www.coinpayments.net/api.php",
+  params={
+   "cmd": "get_tx_info",
+   "txid": txn_id,
+   "key": COINPAYMENTS_PUBLIC_KEY,
+  }
+ )
+
+ if response.status_code in [200, 400, 401]:
+  data = response.json()
+
+  # اطلاعات ممکن است در یک لیست باشند
+  if isinstance(data, list):
+   data = data[0]
+
+  status = data.get("result", {}).get("status")
+  status_text = data.get("result", {}).get("status_text")
+   
+  if status == 100:
+   return "پرداخت شما با موفقیت انجام شد!"
+  elif status in [0, 1, 2]:
+   return f"پرداخت شما در حال انجام است. لطفا منتظر بمانید.\n\nوضعیت فعلی: {status_text}"
+  else:
+   return f"پرداخت شما با مشکل مواجه شده است. لطفا دوباره امتحان کنید.\n\nوضعیت فعلی: {status_text}"
+ else:
+  logging.error(f"API request failed with status code: {response.status_code}")
+
+  if response.status_code == 401:
+ logging.error("Invalid API key.")
+ return "خطا در احراز هویت API. لطفا کلید عمومی خود را بررسی کنید."
+
+if response.status_code == 400:
+ logging.error(f"API request failed with error: {response.text}")
+ return "خطا در درخواست API. لطفا پارامترهای ارسالی را بررسی کنید."
+
+
+
+@bot.message_handler(commands=['start'])
+def start(message):
+ user_id = message.from_user.id
+ user_states[user_id] = None # Initialize state to None
+
+ # ... rest of the code in the start handler
+
+payment_link = "https://www.coinpayments.net/index.php?cmd=_pay&reset=1&merchant=c80ec2928c4b6836e6ada19db1c229ec&item_name=iphone15&currency=USD&amountf=25.00000000&quantity=1&allow_quantity=0&want_shipping=0&allow_extra=1&"
+
+bot.send_message(user_id, f'برای پرداخت 25 دلار، روی دکمه زیر کلیک کنید:\n[اینجا کلیک کنید]({payment_link})',
+      parse_mode='Markdown')
+
+
+@bot.message_handler(func=lambda message: True)
+def handle_message(message):
+ user_id = message.from_user.id
+ txn_id = message.text
+
+ # Check if the Transaction ID is valid
+ if not txn_id or len(txn_id) != 32:
+  bot.send_message(user_id, "شناسه تراکنش نامعتبر است.")
+  return
+
+ # Check the payment status
+ status = check_payment_status(txn_id)
+
+ # Notify the user
+ if status:
+  bot.send_message(user_id, status)
+ else:
+  bot.send_message(user_id, "خطا در دریافت وضعیت پرداخت. لطفاً دوباره تلاش کنید.")
+
+
+@server.route('/ipn', methods=['POST'])
+def handle_ipn():
+ ipn_data = request.get_data().decode('utf-8')
+ data = json.loads(ipn_data)
+
+ # بررسی امضای IPN
+ if not verify_ipn_signature(data):
+  logging.error("Invalid IPN signature.")
+  return "Invalid IPN signature.", 403
+
+ # پردازش داده‌های IPN
+ txn_id = data.get("txn_id")
+ status = data.get("status_text")
+
+ # اطلاع‌رسانی به کاربر درباره بروزرسانی IPN
+ user_id = user_states.get(txn_id)
+ if user_id:
+  bot.send_message(user_id, f"وضعیت پرداخت شما: {status}")
+
+ return "OK", 200
+
+
+# Verify IPN signature
+def verify_ipn_signature(data):
+ # Calculate the expected signature
+ expected_signature = hmac.new(
+  IPN_SECRET.encode(),
+  json.dumps(data, sort_keys=True).encode(),
+  hashlib.sha512
+ ).hexdigest()
+
+ # Check if the signature matches
+ return data.get("hmac") == expected_signature
+
+
+if __name__ == "__main__":
+ bot.polling()
