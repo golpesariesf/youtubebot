@@ -9,3 +9,4 @@ pyTelegramBotAPI==3.8.1
 Flask
 Werkzeug
 coinpayments-py==0.1.0
+telebot==0.0.4
