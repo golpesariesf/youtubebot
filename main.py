@@ -29,7 +29,12 @@ MERCHANT_ID = "c80ec2928c4b6836e6ada19db1c229ec" # اضافه کنید
 
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
-bot.remove_webhook()
+@app.route('/')
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url=APP_URL)
+    return 'Webhook set successfully!', 200
+
 user_states = {}
 
 
