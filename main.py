@@ -20,7 +20,7 @@ from coinpayments_py import CoinPaymentsAPI
 # Setup logging
 logging.basicConfig(filename='bot_log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 TOKEN = '7095077129:AAE-rDWtk6q7S8ZgkxmcfLtnJdMtAYJutq4'
-APP_URL = f'https://biamoozim.pythonanywhere.com/{TOKEN}'
+APP_URL = f'https://youtubenew-c7c31f2cda46.herokuapp.com/{TOKEN}'
 COINPAYMENTS_PUBLIC_KEY = '616e319dad674f8906f129a735d299d6665388a0fe3f4e075ffc3e2b9c3ce8f3'
 COINPAYMENTS_PRIVATE_KEY = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb8A8C4302867b'
 IPN_SECRET = '1122334455667788aA@' # Replace with your CoinPayments IPN Secret
