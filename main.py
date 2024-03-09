@@ -1,9 +1,16 @@
-﻿import os
+﻿from coinpayments import CoinPaymentsAPI
+import uuid
 import telebot
 from flask import Flask, request
-from coinpayments import CoinPaymentsAPI
+import os
+import requests
+import json
+import hmac
+import hashlib
+import logging
 
-#fff
+# Setup logging ggggg
+logging.basicConfig(filename='bot_log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 TOKEN = '7095077129:AAE-rDWtk6q7S8ZgkxmcfLtnJdMtAYJutq4'
 APP_URL = f'https://youtubenew-c7c31f2cda46.herokuapp.com/{TOKEN}'
