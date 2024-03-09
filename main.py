@@ -43,10 +43,9 @@ def handle_ipn():
 
 @server.route('/webhook', methods=['POST'])
 def handle_telegram_webhook():
-    json_str = request.get_data().decode('UTF-8')
-    update = telebot.types.Update.de_json(json_str)
-    bot.process_new_updates([update])
-    return ''
+    bot.remove_webhook()
+    bot.set_webhook(url=APP_URL)
+    return 'Webhook set successfully!', 200
 
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
