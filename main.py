@@ -2,7 +2,7 @@
 import telebot
 from flask import Flask, request
 
-TOKEN = '7137673728:AAE85wL1RBYskkrlCZaIzhEbgKmiEBiefDI'
+TOKEN = '7095077129:AAE-rDWtk6q7S8ZgkxmcfLtnJdMtAYJutq4'
 APP_URL = f'https://youtubenew-c7c31f2cda46.herokuapp.com/{TOKEN}'
 
 bot = telebot.TeleBot(TOKEN)
