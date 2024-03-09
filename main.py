@@ -18,12 +18,20 @@ api = CoinPaymentsAPI(public_key=COINPAYMENTS_PUBLIC_KEY, private_key=COINPAYMEN
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.reply_to(message, 'Hello, ' + message.from_user.first_name)
+    user_id = message.from_user.id
+
+    # Create an inline keyboard with a link button
+    markup = types.InlineKeyboardMarkup()
+    link_button = types.InlineKeyboardButton("Click here to pay", url=f'https://www.coinpayments.net/index.php?cmd=_pay&reset=1&merchant=c80ec2928c4b6836e6ada19db1c229ec&item_name=iphone15&currency=USD&amountf=25.00000000&quantity=1&allow_quantity=0&want_shipping=0&allow_extra=1&')
+    markup.add(link_button)
+
+    bot.reply_to(message, "To make a payment, click on the button below:", reply_markup=markup)
+
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def echo(message):
+    txn_id = request.text.strip()  # Use request.text instead of message.text
     user_id = message.from_user.id
-    txn_id = message.text
 
     if not txn_id or len(txn_id) != 32:
         bot.send_message(user_id, "Invalid transaction ID.")
