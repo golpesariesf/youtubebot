@@ -58,5 +58,25 @@ def webhook():
     bot.set_webhook(url=APP_URL)
     return '!', 200
 
+@server.route('/ipn', methods=['POST'])
+def handle_ipn():
+    ipn = request.get_json()
+    if not ipn:
+        return 'Invalid IPN', 400
+
+    if not api.verify_ipn(ipn, IPN_SECRET):
+        return 'Invalid IPN', 400
+
+    # در اینجا شما می‌توانید وضعیت پرداخت را بررسی کنید و به کاربر اطلاع دهید
+    # برای مثال، شما می‌توانید از api.get_tx_info استفاده کنید تا اطلاعات تراکنش را بدست آورید
+    tx_info = api.get_tx_info(ipn['txn_id'])
+    if tx_info['status'] == 100:
+        print('پرداخت کامل شده است')
+    elif tx_info['status'] < 0:
+        print('پرداخت ناموفق بود')
+    else:
+        print('پرداخت در حال پردازش است')
+
+    return 'OK'
 if __name__ == '__main__':
     server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
