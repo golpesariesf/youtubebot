@@ -13,7 +13,7 @@ import hashlib
 import logging
 import requests
 import uuid
-from coinpayments_py import CoinPaymentsAPI
+from coinpayments import CoinPaymentsAPI
 
 
 
