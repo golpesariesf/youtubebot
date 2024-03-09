@@ -1,4 +1,5 @@
-﻿import telebot
+﻿import os
+import telebot
 from flask import Flask, request
 from coinpayments import CoinPaymentsAPI
 
