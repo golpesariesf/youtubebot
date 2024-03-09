@@ -34,6 +34,13 @@ api = CoinPaymentsAPI(public_key=COINPAYMENTS_PUBLIC_KEY, private_key=COINPAYMEN
 def index():
     return 'Hello, this is your Flask app!'
 
+@app.route('/')
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url=APP_URL)
+    return 'Webhook set successfully!', 200
+
+
 @app.route('/payment/<txn_id>', methods=['GET'])
 def handle_payment(txn_id):
     user_id = request.args.get('user_id')
