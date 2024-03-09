@@ -52,7 +52,7 @@ def echo(message):
     # Notify the user based on the result
     bot.send_message(user_id, result)
 
-ddef check_payment_status_php(txn_id):
+def check_payment_status_php(txn_id):
     # Replace 'ipn.php' with the actual path to your PHP file
     php_file_path = 'path/to/your/php/file.php'
 
