@@ -2,8 +2,8 @@
 import telebot
 from flask import Flask, request
 
-TOKEN = '1810242195:AAFfImqq9mPT81rs3ApL74eUob5u8A9oxb8'
-APP_URL = f'https://vitaljaheroku.herokuapp.com/{TOKEN}'
+TOKEN = '7095077129:AAE-rDWtk6q7S8ZgkxmcfLtnJdMtAYJutq4'
+APP_URL = f'https://biamoozim.pythonanywhere.com/{TOKEN}'
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
 
@@ -34,4 +34,4 @@ def webhook():
 
 
 if __name__ == '__main__':
-    server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5090)))
