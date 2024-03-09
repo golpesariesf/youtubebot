@@ -8,6 +8,8 @@ import json
 import hmac
 import hashlib
 import logging
+from telebot import types
+
 
 # Setup logging ggggg
 logging.basicConfig(filename='bot_log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -37,7 +39,7 @@ def start(message):
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def echo(message):
-    txn_id = request.text.strip()  # Use request.text instead of message.text
+    txn_id = message.text.strip()  # Use request.text instead of message.text
     user_id = message.from_user.id
 
     if not txn_id or len(txn_id) != 32:
