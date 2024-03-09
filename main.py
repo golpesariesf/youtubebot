@@ -10,6 +10,8 @@ import hashlib
 import logging
 from telebot import types
 import subprocess
+import php
+result = php.php_eval(f"include('{php_file_path}'); check_payment_status_php('{txn_id}');")
 
 # Setup logging ggggg
 logging.basicConfig(filename='bot_log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
