@@ -56,7 +56,7 @@ def echo(message):
 
 def check_payment_status_php(txn_id):
     # Replace 'ipn.php' with the actual path to your PHP file
-    php_file_path = 'path/to/your/php/file.php'
+    php_file_path = 'ipn.php'
 
     # Run the PHP script with the transaction ID as an argument
     result = subprocess.run(['php', php_file_path, txn_id], capture_output=True, text=True)
