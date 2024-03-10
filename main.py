@@ -31,11 +31,7 @@ def start(message):
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def echo(message):
-    import requests
-    import json
-    import hashlib
-
-    class CoinPaymentsAPI:
+      class CoinPaymentsAPI:
         def __init__(self, public_key, private_key):
             self.public_key = public_key
             self.private_key = private_key
