@@ -55,8 +55,65 @@ def echo(message):
     bot.send_message(user_id, result)
 
 def check_payment_status_php(txn_id):
+   class CoinPaymentsAPI:
+    def __init__(self, public_key, private_key):
+        self.public_key = public_key
+        self.private_key = private_key
+        self.ch = None
+
+    def check_payment_status(self, txn_id):
+        response = self.api_call('get_tx_info', {'txid': txn_id})
+
+        if 'status' not in response:
+            return 'Invalid response from CoinPayments API.'
+
+        if response['status'] == 100:
+            return 'Payment successful!'
+        elif response['status'] < 0:
+            return 'Payment failed.'
+        else:
+            return 'Payment is still processing.'
+
+    def api_call(self, cmd, req={}):
+        if not self.public_key or not self.private_key:
+            return {'error': 'You have not set your public and private keys!'}
+
+        req['version'] = 1
+        req['cmd'] = cmd
+        req['key'] = self.public_key
+        req['format'] = 'json'
+
+        post_data = '&'.join([f'{key}={value}' for key, value in req.items()])
+        hmac = hashlib.sha512(post_data.encode('utf-8')).hexdigest()
+
+        if self.ch is None:
+            self.ch = requests.Session()
+
+        headers = {'HMAC': hmac}
+        response = self.ch.post('https://www.coinpayments.net/api.php', data=req, headers=headers)
+
+        try:
+            dec = response.json()
+            if dec and isinstance(dec, dict):
+                return dec
+            else:
+                return {'error': f'Unable to parse JSON result ({json.dumps(dec)})'}
+        except json.JSONDecodeError as e:
+            return {'error': f'Unable to parse JSON result ({str(e)})'}
+
+# تابع برای چک کردن وضعیت پرداخت
+def check_payment_status_php(txn_id):
     # Replace 'ipn.php' with the actual path to your PHP file
-    php_file_path = 'ipn.php'
+    private_key = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb8A8C4302867b'
+    public_key = '616e319dad674f8906f129a735d299d6665388a0fe3f4e075ffc3e2b9c3ce8f3'
+
+    coinpayments_api = CoinPaymentsAPI(public_key, private_key)
+    return coinpayments_api.check_payment_status(txn_id)
+
+# Example usage:
+txn_id_to_check = 'YOUR_TRANSACTION_ID'
+payment_status = check_payment_status_php(txn_id_to_check)
+print(payment_status)
 
     # Run the PHP script with the transaction ID as an argument
     result = subprocess.run(['php', php_file_path, txn_id], capture_output=True, text=True)
