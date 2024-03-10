@@ -98,13 +98,6 @@ class CoinPaymentsAPI:
         except json.JSONDecodeError:
             return {'error': 'Unable to parse JSON result.'}
 
-# Example usage:
-COINPAYMENTS_PUBLIC_KEY = '616e319dad674f8906f129a735d299d6665388a0fe3f4e075ffc3e2b9c3ce8f3'
-COINPAYMENTS_PRIVATE_KEY = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb8A8C4302867b'
-api = CoinPaymentsAPI(COINPAYMENTS_PUBLIC_KEY, COINPAYMENTS_PRIVATE_KEY)
-
-# Transaction ID to check
-txn_id_to_check = 'YOUR_TRANSACTION_ID'
 
 # Check payment status
 result = api.check_payment_status(txn_id_to_check)
