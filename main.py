@@ -25,6 +25,7 @@ def generate_and_print_uuid():
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    user_id = message.from_user.id
 
     # Create an inline keyboard with a link button
     markup = types.InlineKeyboardMarkup()
