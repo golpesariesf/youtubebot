@@ -20,6 +20,12 @@ IPN_SECRET = '1122334455667788aA@'
 
 api = CoinPaymentsAPI(public_key=COINPAYMENTS_PUBLIC_KEY, private_key=COINPAYMENTS_PRIVATE_KEY)
 
+@server.route('/')
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url=APP_URL)
+    return '!', 200
+
 @bot.message_handler(commands=['start'])
 def start(message):
     user_id = message.from_user.id
