@@ -77,17 +77,18 @@ def echo(message):
             except json.JSONDecodeError as e:
                 return {'error': f'Unable to parse JSON result ({str(e)})'}
 
-    # Example usage:
-    txn_id_to_check = 'YOUR_TRANSACTION_ID'
-    public_key = '616e319dad674f8906f129a735d299d6665388a0fe3f4e075ffc3e2b9c3ce8f3'
-    private_key = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb8A8C4302867b'
+# Example usage:
+txn_id_to_check = 'YOUR_TRANSACTION_ID'
+public_key = '616e319dad674f8906f129a735d299d6665388a0fe3f4e075ffc3e2b9c3ce8f3'
+private_key = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb8A8C4302867b'
 
-    coinpayments_api = CoinPaymentsAPI(public_key, private_key)
-    payment_status = coinpayments_api.check_payment_status(txn_id_to_check)
-    print(payment_status)
+coinpayments_api = CoinPaymentsAPI(public_key, private_key)
+payment_status = coinpayments_api.check_payment_status(txn_id_to_check)
+print(payment_status)
 
-    # Notify the user based on the result
-    bot.send_message(user_id, payment_status)
+# Notify the user based on the result
+bot.send_message(user_id, payment_status)
+
 
 if __name__ == '__main__':
     server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
