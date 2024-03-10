@@ -35,15 +35,65 @@ def start(message):
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def echo(message):
-    txn_id = message.text.strip()  # Use request.text instead of message.text
-    user_id = message.from_user.id
+   import requests
+import json
+import hashlib
 
-    if not txn_id or len(txn_id) != 32:
-        bot.send_message(user_id, "Invalid transaction ID.")
-        return
+class CoinPaymentsAPI:
+    def __init__(self, public_key, private_key):
+        self.public_key = public_key
+        self.private_key = private_key
+        self.ch = None
 
-    # Check payment status
-    result = check_payment_status_php(txn_id)
+    def check_payment_status(self, txn_id):
+        response = self.api_call('get_tx_info', {'txid': txn_id})
+
+        if 'status' not in response:
+            return 'Invalid response from CoinPayments API.'
+
+        if response['status'] == 100:
+            return 'Payment successful!'
+        elif response['status'] < 0:
+            return 'Payment failed.'
+        else:
+            return 'Payment is still processing.'
+
+    def api_call(self, cmd, req={}):
+        if not self.public_key or not self.private_key:
+            return {'error': 'You have not set your public and private keys!'}
+
+        req['version'] = 1
+        req['cmd'] = cmd
+        req['key'] = self.public_key
+        req['format'] = 'json'
+
+        post_data = '&'.join([f'{key}={value}' for key, value in req.items()])
+        hmac = hashlib.sha512(post_data.encode('utf-8')).hexdigest()
+
+        if self.ch is None:
+            self.ch = requests.Session()
+
+        headers = {'HMAC': hmac}
+        response = self.ch.post('https://www.coinpayments.net/api.php', data=req, headers=headers)
+
+        try:
+            dec = response.json()
+            if dec and isinstance(dec, dict):
+                return dec
+            else:
+                return {'error': f'Unable to parse JSON result ({json.dumps(dec)})'}
+        except json.JSONDecodeError as e:
+            return {'error': f'Unable to parse JSON result ({str(e)})'}
+
+# Example usage:
+txn_id_to_check = 'YOUR_TRANSACTION_ID'
+public_key = '616e319dad674f8906f129a735d299d6665388a0fe3f4e075ffc3e2b9c3ce8f3'
+private_key = 'D544Edec2fa5725C5913C5806665393ec58769563f5C7477DfBb8A8C4302867b'
+
+coinpayments_api = CoinPaymentsAPI(public_key, private_key)
+payment_status = coinpayments_api.check_payment_status(txn_id_to_check)
+print(payment_status)
+
 
     # Notify the user based on the result
     bot.send_message(user_id, result)
